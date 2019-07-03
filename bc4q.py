@@ -182,12 +182,14 @@ if __name__ == '__main__':
 
         def reassign_main_genus(self, genus):
             tmpcopy = copy.deepcopy(self.IDs)
-            for i in tmpcopy:
+            for i in self.IDs:
                 if i.genus == genus:
                     self.mainID.name = i.name
-                    self.mainID.taxonomy = i.taxonomy#necessario verificare il print alla fine
+                    print(self.mainID.taxonomy[-2] + " reassigned to")
+                    self.mainID.taxonomy = i.taxonomy
+                    print(self.mainID.taxonomy[-2])#necessario verificare il print alla fine
                     break
-
+            self.IDs = copy.deepcopy(tmpcopy)
         def get_mainSpec(self):
             spectable = {}
             #spectable[self.mainID.species] = 1
@@ -368,7 +370,10 @@ if __name__ == '__main__':
                 entrez_list.add(id)
                 identity = tmp[-1][2:7]
                 spawn = entity(id)
-                spawn.set_taxonomy(c[id])
+                try:
+                    spawn.set_taxonomy(c[id])
+                except:
+                    spawn.set_taxonomy("NA;NA;NA;NA;NA;NA")
                 if identity == '':
                     local_cluster.set_mainID(spawn)
                     local_cluster.add_ID(spawn)
@@ -414,9 +419,10 @@ if __name__ == '__main__':
                 log.write("score is {}, expecting species level identity\n".format(score))
                 if cluster.get_mainSpec() < 90:
                     log.write("expected species identity not found, trying with genus identity\n")
-                    if cluster.mainID.genus == 'NA':
-                        log.write("WARNING: main genus is NA, cluster will be discarded\n")
-                        log.write(cluster.show_species(c) + "\n")
+                    if not relaxed:
+                        if cluster.mainID.genus == 'NA':
+                            log.write("WARNING: main genus is NA, cluster will be discarded\n")
+                            log.write(cluster.show_species(c) + "\n")
 
                     elif cluster.get_mainGenus() < 90:
                         log.write("reassigning main genus: {}\n".format(cluster.get_most_abundant_genus()))
